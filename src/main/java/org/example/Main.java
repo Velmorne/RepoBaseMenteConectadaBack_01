@@ -1,17 +1,44 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        Scanner scanner = new Scanner(System.in);
+        List<Evento> eventos = new ArrayList<>();  // Lista para almacenar eventos
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        while (true) {
+            System.out.println("===Agregar Eventos===");
+            System.out.println("Agrega el nombre del evento:");
+            String nombreEvento = scanner.nextLine();
+
+            System.out.println("Agrega la fecha del evento (ej. 2025-07-20):");
+            String fechaEvento = scanner.nextLine();
+
+            System.out.println("Agrega el tipo de evento (Charla, taller, etc):");
+            String tipoEvento = scanner.nextLine();
+
+            if (!nombreEvento.trim().isEmpty() && !fechaEvento.trim().isEmpty() && !tipoEvento.trim().isEmpty()) {
+                Evento evento = new Evento(nombreEvento, fechaEvento, tipoEvento);
+                eventos.add(evento);  // Guardamos el evento en la lista
+                System.out.println("¡Evento agregado correctamente!");
+            } else {
+                System.out.println("Por favor, complete todos los campos.");
+            }
+
+            System.out.println("¿Quieres agregar otro evento? (sí/no):");
+            String respuesta = scanner.nextLine().trim().toLowerCase();
+            if (!respuesta.equals("sí") && !respuesta.equals("si")) {
+                break; // Salir del ciclo si la respuesta no es sí
+            }
+        }
+
+        // Mostrar todos los eventos guardados
+        System.out.println("\nLista de eventos guardados:");
+        for (Evento e : eventos) {
+            System.out.println(e);
         }
     }
 }
