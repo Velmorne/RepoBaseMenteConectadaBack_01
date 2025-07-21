@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -9,7 +10,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         List<Evento> eventos = new ArrayList<>();  // Lista para almacenar eventos
 
-        while (true) {
+            while (true) {
             System.out.println("===Agregar Eventos===");
             System.out.println("Agrega el nombre del evento:");
             String nombreEvento = scanner.nextLine();
@@ -36,9 +37,16 @@ public class Main {
         }
 
         // Mostrar todos los eventos guardados
-        System.out.println("\nLista de eventos guardados:");
-        for (Evento e : eventos) {
+        System.out.println("\n===Eventos Registrados===\n");
+        //Recorre la lista de eventos con un ciclo
+            for (Evento e : eventos) {
             System.out.println(e);
         }
+        Integer cantidad = eventos.size();
+        if (cantidad == 0) //Se muestra mensaje si no hay eventos registrados
+            System.out.println("No se han registrado eventos, pronto se agregarán más.");
+        else
+            System.out.println("Se han registrado " + cantidad + " eventos hasta ahora");
+
     }
 }
