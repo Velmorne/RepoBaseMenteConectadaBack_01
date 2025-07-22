@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 
-public class HU024C3 {
+public class HU023C3BuscarEventoPalabraClave {
     // Modelo de evento
     private record Evento(String titulo, String lugar, String fecha) {
         @Override
