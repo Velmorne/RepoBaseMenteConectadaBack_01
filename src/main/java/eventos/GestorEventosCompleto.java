@@ -1,15 +1,14 @@
 package eventos;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * Gestor completo de eventos que permite:
- * - Buscar eventos con palabras similares (búsqueda fuzzy)
- * - Crear nuevos eventos
+ * Gestor de eventos que permite:
+ * - Buscar eventos
  * - Editar eventos existentes
- * - Guardar/eliminar eventos
- * - Ver todos los eventos registrados
+ * - Guardar lo editado
+ * - Crear nuevos eventos
+ * - Validación de datos con ciclos de reingreso
  */
 public class GestorEventosCompleto {
     
@@ -18,33 +17,23 @@ public class GestorEventosCompleto {
     private static Scanner scanner = new Scanner(System.in);
     
     /**
-     * Clase que representa un evento con todos los atributos necesarios
+     * Clase que representa un evento
      */
     static class Evento {
-        private String id;           // Identificador único del evento
         private String nombre;       // Nombre del evento
         private String fecha;        // Fecha del evento
-        private String tipo;         // Tipo (charla, taller, conferencia, etc.)
-        private String lugar;        // Lugar donde se realizará
-        private String descripcion;  // Descripción detallada del evento
+        private String tipo;         // Tipo del evento
+        private String lugar;        // Lugar del evento
         
         // Constructor para crear un nuevo evento
-        public Evento(String nombre, String fecha, String tipo, String lugar, String descripcion) {
-            this.id = generarId();
+        public Evento(String nombre, String fecha, String tipo, String lugar) {
             this.nombre = nombre;
             this.fecha = fecha;
             this.tipo = tipo;
             this.lugar = lugar;
-            this.descripcion = descripcion;
-        }
-        
-        // Genera un ID único para cada evento
-        private String generarId() {
-            return "EVT-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
         }
         
         // Getters y setters para acceder y modificar los atributos
-        public String getId() { return id; }
         public String getNombre() { return nombre; }
         public void setNombre(String nombre) { this.nombre = nombre; }
         public String getFecha() { return fecha; }
@@ -53,18 +42,15 @@ public class GestorEventosCompleto {
         public void setTipo(String tipo) { this.tipo = tipo; }
         public String getLugar() { return lugar; }
         public void setLugar(String lugar) { this.lugar = lugar; }
-        public String getDescripcion() { return descripcion; }
-        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
         
-        // Método que devuelve toda la información del evento como texto
+        // Método para obtener todo el texto del evento para búsquedas
         public String getTextoCompleto() {
-            return nombre + " " + tipo + " " + lugar + " " + descripcion;
+            return nombre + " " + tipo + " " + lugar;
         }
         
         @Override
         public String toString() {
-            return String.format("• [%s] %s - %s @ %s\n  ID: %s | Descripción: %s",
-                    tipo, nombre, fecha, lugar, id, descripcion);
+            return "• " + nombre + " - " + fecha + " @ " + lugar + " [" + tipo + "]";
         }
     }
     
@@ -72,27 +58,18 @@ public class GestorEventosCompleto {
         // Inicializar con algunos eventos de ejemplo
         inicializarEventosEjemplo();
         
-        // Configurar idioma español
-        Locale.setDefault(new Locale("es", "CO"));
-        
         // Mostrar menú principal
         mostrarMenuPrincipal();
     }
     
     /**
-     * Inicializa la aplicación con eventos de ejemplo para demostrar funcionalidad
+     * Inicializa la aplicación con eventos de ejemplo
      */
     private static void inicializarEventosEjemplo() {
-        eventos.add(new Evento("Taller de Control Emocional", "22-julio-2024", "taller", 
-                "Centro de Bienestar", "Aprende técnicas para manejar tus emociones"));
-        eventos.add(new Evento("Seminario sobre Trastorno Límite de Personalidad", "25-julio-2024", "seminario",
-                "Auditorio U. Nacional", "Información sobre TLP y estrategias de manejo"));
-        eventos.add(new Evento("Jornada de Mindfulness y Ansiedad", "30-julio-2024", "jornada",
-                "Parque de los Deseos", "Práctica de mindfulness para reducir ansiedad"));
-        eventos.add(new Evento("Charla sobre Depresión y Autoestima", "5-agosto-2024", "charla",
-                "Fundación Mente Sana", "Estrategias para mejorar autoestima y combatir depresión"));
-        eventos.add(new Evento("Conferencia de Salud Mental en el Trabajo", "15-agosto-2024", "conferencia",
-                "Cámara de Comercio", "Cómo mantener bienestar mental en ambiente laboral"));
+        eventos.add(new Evento("Taller de Control Emocional", "22-julio-2024", "taller", "Centro de Bienestar"));
+        eventos.add(new Evento("Seminario sobre Depresión", "25-julio-2024", "seminario", "Auditorio U. Nacional"));
+        eventos.add(new Evento("Jornada de Mindfulness", "30-julio-2024", "jornada", "Parque de los Deseos"));
+        eventos.add(new Evento("Charla sobre Ansiedad", "5-agosto-2024", "charla", "Fundación Mente Sana"));
     }
     
     /**
@@ -100,17 +77,11 @@ public class GestorEventosCompleto {
      */
     private static void mostrarMenuPrincipal() {
         while (true) {
-            System.out.println("\n" + "=".repeat(50));
-            System.out.println("🧠 GESTOR COMPLETO DE EVENTOS DE SALUD MENTAL 🧠");
-            System.out.println("=".repeat(50));
-            System.out.println("1. 🔍 Buscar eventos (búsqueda inteligente)");
-            System.out.println("2. ➕ Crear nuevo evento");
-            System.out.println("3. 📝 Editar evento existente");
-            System.out.println("4. 🗑️  Eliminar evento");
-            System.out.println("5. 👁️  Ver todos los eventos");
-            System.out.println("6. 📊 Estadísticas de eventos");
-            System.out.println("0. ❌ Salir");
-            System.out.println("=".repeat(50));
+            System.out.println("\n=== GESTOR DE EVENTOS ===");
+            System.out.println("1. Buscar eventos");
+            System.out.println("2. Crear nuevo evento");
+            System.out.println("3. Editar evento existente");
+            System.out.println("0. Salir");
             System.out.print("Selecciona una opción: ");
             
             String opcion = scanner.nextLine().trim();
@@ -119,460 +90,203 @@ public class GestorEventosCompleto {
                 case "1" -> buscarEventos();
                 case "2" -> crearNuevoEvento();
                 case "3" -> editarEvento();
-                case "4" -> eliminarEvento();
-                case "5" -> verTodosLosEventos();
-                case "6" -> mostrarEstadisticas();
                 case "0" -> {
-                    System.out.println("¡Gracias por usar el Gestor de Eventos! 🧠💚");
+                    System.out.println("¡Gracias por usar el Gestor de Eventos!");
                     return;
                 }
-                default -> System.out.println("❌ Opción no válida. Por favor, intenta de nuevo.");
+                default -> System.out.println("Opción no válida. Intenta de nuevo.");
             }
         }
     }
     
     /**
-     * Implementa búsqueda inteligente de eventos con coincidencias difusas
-     * Busca en nombre, tipo, lugar y descripción
+     * Busca eventos por palabra clave
      */
     private static void buscarEventos() {
-        System.out.println("\n🔍 BÚSQUEDA INTELIGENTE DE EVENTOS");
-        System.out.println("-".repeat(40));
-        System.out.print("Ingresa palabra(s) clave para buscar: ");
+        System.out.println("\n=== BUSCAR EVENTOS ===");
+        System.out.print("Ingresa palabra clave para buscar: ");
         String termino = scanner.nextLine().trim().toLowerCase();
         
+        // Si no ingresa nada, regresa al menú
         if (termino.isEmpty()) {
-            System.out.println("❌ No se ingresó ningún término de búsqueda.");
+            System.out.println("No se ingresó término de búsqueda.");
             return;
         }
         
-        // Lista para almacenar eventos encontrados con su puntuación de relevancia
-        List<EventoConPuntuacion> eventosEncontrados = new ArrayList<>();
+        // Lista para almacenar eventos encontrados
+        List<Evento> eventosEncontrados = new ArrayList<>();
         
         // Buscar en todos los eventos
         for (Evento evento : eventos) {
-            int puntuacion = calcularPuntuacionBusqueda(evento, termino);
-            if (puntuacion > 0) {
-                eventosEncontrados.add(new EventoConPuntuacion(evento, puntuacion));
+            // Busca si el término aparece en el texto completo del evento
+            if (evento.getTextoCompleto().toLowerCase().contains(termino)) {
+                eventosEncontrados.add(evento);
             }
         }
-        
-        // Ordenar por relevancia (puntuación más alta primero)
-        eventosEncontrados.sort((a, b) -> Integer.compare(b.puntuacion, a.puntuacion));
         
         // Mostrar resultados
         if (eventosEncontrados.isEmpty()) {
-            System.out.println("❌ No se encontraron eventos que coincidan con: \"" + termino + "\"");
-            sugerirEventosSimilares(termino);
+            System.out.println("No se encontraron eventos que contengan: \"" + termino + "\"");
         } else {
-            System.out.println("✅ Eventos encontrados (" + eventosEncontrados.size() + " resultados):");
-            System.out.println("-".repeat(60));
-            
+            System.out.println("Eventos encontrados:");
             for (int i = 0; i < eventosEncontrados.size(); i++) {
-                EventoConPuntuacion ecp = eventosEncontrados.get(i);
-                System.out.println((i + 1) + ". " + ecp.evento);
-                System.out.println("   📊 Relevancia: " + ecp.puntuacion + "/100");
-                System.out.println();
+                System.out.println((i + 1) + ". " + eventosEncontrados.get(i));
             }
         }
     }
     
     /**
-     * Calcula qué tan relevante es un evento para una búsqueda específica
-     * Retorna un puntaje de 0-100 basado en coincidencias exactas y similares
-     */
-    private static int calcularPuntuacionBusqueda(Evento evento, String termino) {
-        String textoEvento = evento.getTextoCompleto().toLowerCase();
-        String[] palabrasBusqueda = termino.split("\\s+");
-        int puntuacionTotal = 0;
-        
-        for (String palabra : palabrasBusqueda) {
-            // Coincidencia exacta vale más puntos
-            if (textoEvento.contains(palabra)) {
-                puntuacionTotal += 30;
-            }
-            // Búsqueda de palabras similares (contiene parte de la palabra)
-            else if (contieneSubcadena(textoEvento, palabra)) {
-                puntuacionTotal += 15;
-            }
-            // Búsqueda fonética básica (palabras que suenan similar)
-            else if (esSimilarFonetica(textoEvento, palabra)) {
-                puntuacionTotal += 10;
-            }
-        }
-        
-        // Bonus por coincidencia en el nombre (es más relevante)
-        if (evento.getNombre().toLowerCase().contains(termino)) {
-            puntuacionTotal += 20;
-        }
-        
-        return Math.min(puntuacionTotal, 100); // Máximo 100 puntos
-    }
-    
-    /**
-     * Verifica si una cadena contiene una subcadena con tolerancia a errores
-     */
-    private static boolean contieneSubcadena(String texto, String busqueda) {
-        if (busqueda.length() < 3) return false;
-        
-        // Buscar subcadenas de la palabra
-        for (int i = 0; i <= busqueda.length() - 3; i++) {
-            String subcadena = busqueda.substring(i, i + 3);
-            if (texto.contains(subcadena)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Implementa una búsqueda fonética básica para palabras similares
-     */
-    private static boolean esSimilarFonetica(String texto, String palabra) {
-        // Mapeo básico de sonidos similares en español
-        Map<String, String[]> sonidosSimilares = Map.of(
-            "c", new String[]{"k", "qu"},
-            "s", new String[]{"z", "c"},
-            "b", new String[]{"v"},
-            "g", new String[]{"j"},
-            "y", new String[]{"ll", "i"}
-        );
-        
-        for (Map.Entry<String, String[]> entrada : sonidosSimilares.entrySet()) {
-            String original = entrada.getKey();
-            for (String similar : entrada.getValue()) {
-                String palabraModificada = palabra.replace(original, similar);
-                if (texto.contains(palabraModificada)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Sugiere eventos similares cuando no se encuentran coincidencias exactas
-     */
-    private static void sugerirEventosSimilares(String termino) {
-        System.out.println("💡 ¿Quizás te interese alguno de estos eventos?");
-        
-        // Mostrar eventos por tipo similar
-        Set<String> tiposEventos = eventos.stream()
-                .map(e -> e.getTipo())
-                .collect(Collectors.toSet());
-        
-        System.out.println("📋 Tipos de eventos disponibles: " + String.join(", ", tiposEventos));
-    }
-    
-    /**
-     * Permite crear un nuevo evento solicitando todos los datos necesarios
+     * Crea un nuevo evento solicitando todos los datos
      */
     private static void crearNuevoEvento() {
-        System.out.println("\n➕ CREAR NUEVO EVENTO");
-        System.out.println("-".repeat(30));
+        System.out.println("\n=== CREAR NUEVO EVENTO ===");
         
         // Solicitar datos del evento con validación
-        String nombre = solicitarDatoObligatorio("Nombre del evento");
-        String fecha = solicitarDatoObligatorio("Fecha (ej. 15-marzo-2024)");
-        String tipo = solicitarTipoEvento();
-        String lugar = solicitarDatoObligatorio("Lugar del evento");
-        String descripcion = solicitarDatoOpcional("Descripción del evento");
+        String nombre = solicitarDatoValido("Nombre del evento");
+        String fecha = solicitarDatoValido("Fecha del evento (ej. 15-marzo-2024)");
+        String tipo = solicitarDatoValido("Tipo de evento (charla, taller, seminario, etc.)");
+        String lugar = solicitarDatoValido("Lugar del evento");
         
         // Crear y agregar el nuevo evento
-        Evento nuevoEvento = new Evento(nombre, fecha, tipo, lugar, descripcion);
+        Evento nuevoEvento = new Evento(nombre, fecha, tipo, lugar);
         eventos.add(nuevoEvento);
         
-        System.out.println("✅ ¡Evento creado exitosamente!");
-        System.out.println("📋 Detalles del evento:");
-        System.out.println(nuevoEvento);
+        System.out.println("¡Evento creado exitosamente!");
+        System.out.println("Evento creado: " + nuevoEvento);
     }
     
     /**
-     * Solicita al usuario un tipo de evento de una lista predefinida
+     * Solicita un dato al usuario hasta que ingrese información válida
+     * Ciclo que se repite si el usuario ingresa datos incorrectos o vacíos
      */
-    private static String solicitarTipoEvento() {
-        String[] tiposDisponibles = {"charla", "taller", "conferencia", "seminario", "jornada", "grupo de apoyo"};
-        
-        System.out.println("Tipos de evento disponibles:");
-        for (int i = 0; i < tiposDisponibles.length; i++) {
-            System.out.println((i + 1) + ". " + tiposDisponibles[i]);
-        }
-        System.out.println((tiposDisponibles.length + 1) + ". Otro (especificar)");
-        
-        while (true) {
-            System.out.print("Selecciona el tipo de evento (1-" + (tiposDisponibles.length + 1) + "): ");
-            String opcion = scanner.nextLine().trim();
-            
-            try {
-                int indice = Integer.parseInt(opcion) - 1;
-                if (indice >= 0 && indice < tiposDisponibles.length) {
-                    return tiposDisponibles[indice];
-                } else if (indice == tiposDisponibles.length) {
-                    return solicitarDatoObligatorio("Especifica el tipo de evento");
-                }
-            } catch (NumberFormatException e) {
-                // Continuar el bucle para solicitar entrada válida
-            }
-            
-            System.out.println("❌ Opción no válida. Por favor, intenta de nuevo.");
-        }
-    }
-    
-    /**
-     * Solicita un dato obligatorio al usuario y valida que no esté vacío
-     */
-    private static String solicitarDatoObligatorio(String nombreCampo) {
+    private static String solicitarDatoValido(String nombreCampo) {
         while (true) {
             System.out.print(nombreCampo + ": ");
             String dato = scanner.nextLine().trim();
+            
+            // Validar que no esté vacío
             if (!dato.isEmpty()) {
                 return dato;
             }
-            System.out.println("❌ Este campo es obligatorio. Por favor, ingresa un valor.");
+            
+            // Si está vacío, pedir de nuevo
+            System.out.println("Error: Este campo no puede estar vacío. Por favor, ingresa un valor válido.");
         }
-    }
-    
-    /**
-     * Solicita un dato opcional al usuario
-     */
-    private static String solicitarDatoOpcional(String nombreCampo) {
-        System.out.print(nombreCampo + " (opcional): ");
-        return scanner.nextLine().trim();
     }
     
     /**
      * Permite editar un evento existente
      */
     private static void editarEvento() {
+        // Verificar si hay eventos para editar
         if (eventos.isEmpty()) {
-            System.out.println("❌ No hay eventos registrados para editar.");
+            System.out.println("No hay eventos registrados para editar.");
             return;
         }
         
-        System.out.println("\n📝 EDITAR EVENTO EXISTENTE");
-        System.out.println("-".repeat(35));
+        System.out.println("\n=== EDITAR EVENTO EXISTENTE ===");
         
-        // Mostrar lista de eventos para seleccionar
-        mostrarListaEventosNumerada();
+        // Mostrar lista de eventos disponibles
+        mostrarListaEventos();
         
-        System.out.print("Selecciona el número del evento a editar (0 para cancelar): ");
-        String opcion = scanner.nextLine().trim();
+        // Solicitar selección del evento con validación
+        int indiceEvento = solicitarSeleccionEvento();
         
-        try {
-            int indice = Integer.parseInt(opcion);
-            if (indice == 0) {
-                System.out.println("❌ Operación cancelada.");
-                return;
-            }
-            
-            if (indice < 1 || indice > eventos.size()) {
-                System.out.println("❌ Número de evento no válido.");
-                return;
-            }
-            
-            Evento evento = eventos.get(indice - 1);
-            editarCamposEvento(evento);
-            
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Por favor, ingresa un número válido.");
+        // Si cancela, regresar
+        if (indiceEvento == -1) {
+            System.out.println("Operación cancelada.");
+            return;
+        }
+        
+        // Obtener el evento seleccionado
+        Evento evento = eventos.get(indiceEvento);
+        
+        // Editar los campos del evento
+        editarCamposEvento(evento);
+        
+        System.out.println("¡Evento editado y guardado exitosamente!");
+        System.out.println("Evento actualizado: " + evento);
+    }
+    
+    /**
+     * Muestra la lista numerada de todos los eventos
+     */
+    private static void mostrarListaEventos() {
+        System.out.println("Lista de eventos:");
+        for (int i = 0; i < eventos.size(); i++) {
+            System.out.println((i + 1) + ". " + eventos.get(i));
         }
     }
     
     /**
-     * Permite editar campos específicos de un evento
+     * Solicita al usuario seleccionar un evento de la lista
+     * Ciclo que se repite si ingresa un número inválido
+     */
+    private static int solicitarSeleccionEvento() {
+        while (true) {
+            System.out.print("Selecciona el número del evento a editar (0 para cancelar): ");
+            String entrada = scanner.nextLine().trim();
+            
+            try {
+                int numero = Integer.parseInt(entrada);
+                
+                // Si ingresa 0, cancelar operación
+                if (numero == 0) {
+                    return -1;
+                }
+                
+                // Validar que el número esté en el rango válido
+                if (numero >= 1 && numero <= eventos.size()) {
+                    return numero - 1; // Convertir a índice (base 0)
+                } else {
+                    System.out.println("Error: Número fuera de rango. Ingresa un número entre 1 y " + eventos.size() + " (o 0 para cancelar).");
+                }
+                
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Ingresa un número válido.");
+            }
+        }
+    }
+    
+    /**
+     * Permite editar cada campo del evento
+     * Los cambios se guardan automáticamente en el objeto
      */
     private static void editarCamposEvento(Evento evento) {
-        System.out.println("\n📋 Editando evento: " + evento.getNombre());
-        System.out.println("💡 Presiona ENTER para mantener el valor actual");
-        System.out.println("-".repeat(40));
+        System.out.println("\nEditando evento: " + evento.getNombre());
+        System.out.println("Presiona ENTER para mantener el valor actual");
         
-        // Editar cada campo del evento
+        // Editar nombre
         String nuevoNombre = editarCampo("Nombre", evento.getNombre());
-        if (!nuevoNombre.isEmpty()) evento.setNombre(nuevoNombre);
+        if (!nuevoNombre.isEmpty()) {
+            evento.setNombre(nuevoNombre);
+        }
         
+        // Editar fecha
         String nuevaFecha = editarCampo("Fecha", evento.getFecha());
-        if (!nuevaFecha.isEmpty()) evento.setFecha(nuevaFecha);
+        if (!nuevaFecha.isEmpty()) {
+            evento.setFecha(nuevaFecha);
+        }
         
+        // Editar tipo
         String nuevoTipo = editarCampo("Tipo", evento.getTipo());
-        if (!nuevoTipo.isEmpty()) evento.setTipo(nuevoTipo);
+        if (!nuevoTipo.isEmpty()) {
+            evento.setTipo(nuevoTipo);
+        }
         
+        // Editar lugar
         String nuevoLugar = editarCampo("Lugar", evento.getLugar());
-        if (!nuevoLugar.isEmpty()) evento.setLugar(nuevoLugar);
-        
-        String nuevaDescripcion = editarCampo("Descripción", evento.getDescripcion());
-        if (!nuevaDescripcion.isEmpty()) evento.setDescripcion(nuevaDescripcion);
-        
-        System.out.println("✅ ¡Evento actualizado exitosamente!");
-        System.out.println("📋 Datos actualizados:");
-        System.out.println(evento);
+        if (!nuevoLugar.isEmpty()) {
+            evento.setLugar(nuevoLugar);
+        }
     }
     
     /**
      * Solicita al usuario editar un campo específico
+     * Muestra el valor actual y permite mantenerlo o cambiarlo
      */
     private static String editarCampo(String nombreCampo, String valorActual) {
         System.out.print(nombreCampo + " [" + valorActual + "]: ");
         return scanner.nextLine().trim();
-    }
-    
-    /**
-     * Permite eliminar un evento de la lista
-     */
-    private static void eliminarEvento() {
-        if (eventos.isEmpty()) {
-            System.out.println("❌ No hay eventos registrados para eliminar.");
-            return;
-        }
-        
-        System.out.println("\n🗑️ ELIMINAR EVENTO");
-        System.out.println("-".repeat(25));
-        
-        mostrarListaEventosNumerada();
-        
-        System.out.print("Selecciona el número del evento a eliminar (0 para cancelar): ");
-        String opcion = scanner.nextLine().trim();
-        
-        try {
-            int indice = Integer.parseInt(opcion);
-            if (indice == 0) {
-                System.out.println("❌ Operación cancelada.");
-                return;
-            }
-            
-            if (indice < 1 || indice > eventos.size()) {
-                System.out.println("❌ Número de evento no válido.");
-                return;
-            }
-            
-            Evento evento = eventos.get(indice - 1);
-            
-            // Confirmar eliminación
-            System.out.print("⚠️ ¿Estás seguro de eliminar \"" + evento.getNombre() + "\"? (si/no): ");
-            String confirmacion = scanner.nextLine().trim().toLowerCase();
-            
-            if (confirmacion.equals("si") || confirmacion.equals("sí")) {
-                eventos.remove(indice - 1);
-                System.out.println("✅ Evento eliminado exitosamente.");
-            } else {
-                System.out.println("❌ Eliminación cancelada.");
-            }
-            
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Por favor, ingresa un número válido.");
-        }
-    }
-    
-    /**
-     * Muestra todos los eventos registrados en el sistema
-     */
-    private static void verTodosLosEventos() {
-        System.out.println("\n👁️ TODOS LOS EVENTOS REGISTRADOS");
-        System.out.println("=".repeat(50));
-        
-        if (eventos.isEmpty()) {
-            System.out.println("❌ No hay eventos registrados en este momento.");
-            System.out.println("💡 Usa la opción 2 para crear tu primer evento.");
-            return;
-        }
-        
-        // Agrupar eventos por tipo para mejor organización
-        Map<String, List<Evento>> eventosPorTipo = eventos.stream()
-                .collect(Collectors.groupingBy(Evento::getTipo));
-        
-        int totalEventos = 0;
-        for (Map.Entry<String, List<Evento>> grupo : eventosPorTipo.entrySet()) {
-            String tipo = grupo.getKey().toUpperCase();
-            List<Evento> eventosDelTipo = grupo.getValue();
-            
-            System.out.println("\n📂 " + tipo + " (" + eventosDelTipo.size() + " eventos)");
-            System.out.println("-".repeat(30));
-            
-            for (Evento evento : eventosDelTipo) {
-                System.out.println(evento);
-                System.out.println();
-                totalEventos++;
-            }
-        }
-        
-        System.out.println("📊 Total de eventos: " + totalEventos);
-    }
-    
-    /**
-     * Muestra una lista numerada de eventos para selección
-     */
-    private static void mostrarListaEventosNumerada() {
-        System.out.println("📋 Lista de eventos:");
-        for (int i = 0; i < eventos.size(); i++) {
-            Evento evento = eventos.get(i);
-            System.out.println((i + 1) + ". " + evento.getNombre() + " - " + evento.getFecha());
-        }
-        System.out.println();
-    }
-    
-    /**
-     * Muestra estadísticas generales sobre los eventos
-     */
-    private static void mostrarEstadisticas() {
-        System.out.println("\n📊 ESTADÍSTICAS DE EVENTOS");
-        System.out.println("=".repeat(40));
-        
-        if (eventos.isEmpty()) {
-            System.out.println("❌ No hay eventos para mostrar estadísticas.");
-            return;
-        }
-        
-        // Estadísticas por tipo
-        Map<String, Long> eventosPorTipo = eventos.stream()
-                .collect(Collectors.groupingBy(Evento::getTipo, Collectors.counting()));
-        
-        System.out.println("📈 Eventos por tipo:");
-        eventosPorTipo.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .forEach(entry -> 
-                    System.out.println("  • " + entry.getKey() + ": " + entry.getValue() + " eventos"));
-        
-        // Estadísticas por mes (análisis básico)
-        Map<String, Long> eventosPorMes = eventos.stream()
-                .collect(Collectors.groupingBy(
-                    evento -> extraerMes(evento.getFecha()), 
-                    Collectors.counting()));
-        
-        System.out.println("\n📅 Eventos por mes:");
-        eventosPorMes.forEach((mes, cantidad) -> 
-            System.out.println("  • " + mes + ": " + cantidad + " eventos"));
-        
-        System.out.println("\n📊 Resumen general:");
-        System.out.println("  • Total de eventos: " + eventos.size());
-        System.out.println("  • Tipos diferentes: " + eventosPorTipo.size());
-        System.out.println("  • Evento más común: " + 
-            eventosPorTipo.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse("N/A"));
-    }
-    
-    /**
-     * Extrae el mes de una fecha en formato string
-     */
-    private static String extraerMes(String fecha) {
-        // Análisis básico para extraer mes de formatos como "15-marzo-2024"
-        String[] partes = fecha.split("-");
-        if (partes.length >= 2) {
-            return partes[1];
-        }
-        return "Desconocido";
-    }
-    
-    /**
-     * Clase auxiliar para almacenar eventos con su puntuación de búsqueda
-     */
-    private static class EventoConPuntuacion {
-        Evento evento;
-        int puntuacion;
-        
-        EventoConPuntuacion(Evento evento, int puntuacion) {
-            this.evento = evento;
-            this.puntuacion = puntuacion;
-        }
     }
 }
