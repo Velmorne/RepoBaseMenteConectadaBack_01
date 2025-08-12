@@ -25,14 +25,15 @@ public class HU023C3BuscarEventoPalabraClave {
                 new Evento("Jornada de Mindfulness y Ansiedad", "Parque de los Deseos", "30-julio"),
                 new Evento("Charla sobre Depresión y Autoestima", "Fundación Mente Sana", "5-agosto"),
                 new Evento("Grupo de Apoyo para Jóvenes con Ansiedad", "Centro Psicológico Zenith", "10-agosto"),
-                new Evento("Conferencia: Salud Mental en el Trabajo", "Cámara de Comercio", "15-agosto")
+                new Evento("Conferencia: Salud Mental en el Trabajo", "Cámara de Comercio", "15-agosto"),
+                new Evento("Conferencia: Salud Mental en la Universidad", "Cámara de Comercio", "20-agosto")
         );
 
         try (Scanner sc = new Scanner(System.in)) {
             while (true) {
                 System.out.println("\n=== Buscador de eventos de salud mental ===");
                 System.out.print("Escribe palabra clave (o ENTER para salir): ");
-                String termino = sc.nextLine().trim().toLowerCase();
+                String termino = sc.nextLine().trim().toLowerCase(); //"término" referente a "Palabra"
 
                 if (termino.isEmpty()) {
                     System.out.println("¡Gracias por usar el buscador! 🧠");
