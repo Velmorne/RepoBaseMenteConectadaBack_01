@@ -44,7 +44,7 @@ public class HU030C3AsignarCodigoUnico {
                 secuencia++;
             }
 
-            System.out.println("\n--- Fin de la lista de eventos ---");
+            System.out.println("\n---  Fin de la lista de eventos  ---");
         }
     }
 }
